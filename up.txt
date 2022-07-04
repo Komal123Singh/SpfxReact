@@ -1,0 +1,24 @@
+ if (FormAttachemntDelete.length !== 0) {
+        await res.item.attachmentFiles
+          .deleteMultiple(FormAttachemntDelete)
+          .then(() => {
+            console.log("deleted");
+          });
+      }
+      if (FormAttachment != null) {
+        await res.item.attachmentFiles.addMultiple(FormAttachment).then(() => {
+          res.item
+            .select("ID,AttachmentFiles")
+            .expand("AttachmentFiles")
+            .get()
+            .then(async (results: any) => {
+              let itemID = results.ID;
+              let fileData = results.AttachmentFiles;
+
+              console.log("update results", results);
+            })
+            .catch((e) => {
+              console.log("files not uploaded", e);
+            });
+        });
+      }

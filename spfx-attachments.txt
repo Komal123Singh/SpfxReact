@@ -1,0 +1,127 @@
+  <div className="row">
+                  <div className="col-md-12">
+                    {this.state.FormAttachmentNames !== undefined &&
+                    this.state.FormAttachmentNames !== null
+                      ? this.state.FormAttachmentNames.map((item) => (
+                          <span>
+                            <Link
+                              key={item.FileName}
+                              onClick={() =>
+                                window.open(
+                                  item.ServerRelativePath.DecodedUrl,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              {item.FileName}
+                            </Link>
+                            {uniqueId == 0 ? null : (
+                              <IconButton
+                                className="mt-1"
+                                iconProps={{ iconName: "Download" }}
+                                title="Download"
+                                ariaLabel="Download"
+                                onClick={() =>
+                                  (window.location.href =
+                                    this.props.context.pageContext.web
+                                      .absoluteUrl +
+                                    "/_layouts/download.aspx?sourceurl=" +
+                                    item.ServerRelativePath.DecodedUrl)
+                                }
+                              />
+                            )}
+
+                            <IconButton
+                              className="mt-1"
+                              iconProps={{ iconName: "Delete" }}
+                              title="Delete"
+                              ariaLabel="Delete"
+                              onClick={() => this.addDeleteFiles(item.FileName)}
+                            />
+                          </span>
+                        ))
+                      : null}
+                  </div>
+                </div>
+------------------------------------------------
+ private addDeleteFiles = async (fileName) => {
+    try {
+      let tempAttachFileName = this.state.FormAttachmentNames;
+      //console.log("tempAttachFileName", tempAttachFileName);
+
+      var index = tempAttachFileName.map((p) => p.FileName).indexOf(fileName);
+      if (
+        uniqueId != 0 &&
+        this.state.FormAttachmentDeleteFile != undefined &&
+        this.state.FormAttachmentDeleteFile.length != 0
+      ) {
+        var indexCheck = this.state.FormAttachmentDeleteFile.map(
+          (p) => p.FileName
+        ).indexOf(fileName);
+        indexCheck != -1 &&
+        this.state.FormAttachmentDeleteFile[indexCheck].ServerRelativePath !=
+          undefined
+          ? deleteFiles.push(fileName)
+          : null;
+        tempAttachFileName.splice(index, 1);
+        //console.log("tempAttachFileName", tempAttachFileName);
+        await this.setState({ FormAttachmentNames: tempAttachFileName });
+      }
+      if (uniqueId != 0) {
+        var indexCheck = this.state.FormAttachmentDeleteFile.map(
+          (p) => p.FileName
+        ).indexOf(fileName);
+        indexCheck === -1 ? deleteFiles.push(fileName) : null;
+        let filtered = tempAttachFileName.filter(
+          (file) => file.FileName !== fileName
+        );
+        //console.log("filtered", filtered);
+        await this.setState({
+          FormAttachmentNames: filtered,
+          FormAttachmentDeleteFile: deleteFiles,
+        });
+      }
+    } catch (e) {
+      console.log("addDeleteFiles " + e);
+    }
+  };
+-----------------------------------
+ private handleAttachmentChange = (chTarget) => {
+    try {
+      let { FormAttachment, FormAttachmentNames } = this.state;
+      // let fileInfos = [];
+
+      let target = chTarget.target;
+
+      if (FormAttachment.length !== 0 || target.files.length !== 0) {
+        let fileName = [];
+        let tempfile = [];
+        let tempFName = [];
+        FormAttachment.forEach((aFiles) => {
+          if (aFiles.name === target.files.name) {
+            console.log("file already exisist with same name");
+          }
+        });
+        tempfile = this.state.FormAttachment;
+        tempFName = this.state.FormAttachmentNames;
+        //console.log("handle file change", tempfile, tempFName);
+
+        for (let fileItem of target.files) {
+          tempFName.push({ FileName: fileItem.name });
+          tempfile.push({ name: fileItem.name, content: fileItem });
+          // console.log("handle file change", tempfile, tempFName);
+          this.setState({
+            FormAttachment: tempfile,
+            FormAttachmentNames: tempFName,
+          });
+        }
+      }
+
+    } catch (e) {
+      console.log("handleAttachmentChange: " + e);
+    }
+  };
+-------------------------------------------------
+[7:29 AM] Vidyashree Budanuru (Contractor)
+  if (FormAttachemntDelete.length !== 0) {        await res.item.attachmentFiles          .deleteMultiple(FormAttachemntDelete)          .then(() => {            console.log("deleted");          });      }      if (FormAttachment != null) {        await res.item.attachmentFiles.addMultiple(FormAttachment).then(() => {          res.item            .select("ID,AttachmentFiles")            .expand("AttachmentFiles")            .get()            .then(async (results: any) => {              let itemID = results.ID;              let fileData = results.AttachmentFiles;              console.log("update results", results);            })            .catch((e) => {              console.log("files not uploaded", e);            });        });      }
+
